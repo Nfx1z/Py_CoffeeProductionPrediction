@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prediksi Produksi Kopi Arabika — Bener Meriah</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ─── TOKENS ─────────────────────────────────────────────────────── */
+:root {
+  --soil:      #2C1A0E;
+  --bark:      #5C3A1E;
+  --bean:      #8B5E3C;
+  --cream:     #F5EFE6;
+  --parchment: #EDE3D4;
+  --moss:      #3D5A3E;
+  --leaf:      #5C7A3E;
+  --sprout:    #8AAF5A;
+  --gold:      #C8973A;
+  --mist:      #F0EBE3;
+  --shadow:    rgba(44,26,14,0.12);
+  --deep:      rgba(44,26,14,0.7);
+
+  --r-sm: 8px;
+  --r-md: 16px;
+  --r-lg: 24px;
+  --r-xl: 32px;
+
+  --t: 0.25s cubic-bezier(0.4,0,0.2,1);
+}
+
+/* ─── RESET ─────────────────────────────────────────────────────── */
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--cream);
+  color: var(--soil);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ─── GRAIN TEXTURE ─────────────────────────────────────────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+}
+
+/* ─── HEADER ────────────────────────────────────────────────────── */
+header {
+  position: relative;
+  background: var(--soil);
+  color: var(--cream);
+  padding: 48px 40px 56px;
+  overflow: hidden;
+}
+header::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 70% 50%, var(--bark) 0%, transparent 70%);
+  opacity: 0.6;
+}
+header::after {
+  content: '☕';
+  position: absolute;
+  right: 48px; top: 50%;
+  transform: translateY(-50%);
+  font-size: 120px;
+  opacity: 0.06;
+  filter: blur(2px);
+  user-select: none;
+}
+.header-inner { position: relative; max-width: 900px; }
+.header-badge {
+  display: inline-block;
+  background: var(--gold);
+  color: var(--soil);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 4px 12px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+header h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  margin-bottom: 12px;
+}
+header h1 em { color: var(--gold); font-style: normal; }
+header p {
+  font-size: 15px;
+  color: rgba(245,239,230,0.7);
+  font-weight: 300;
+  max-width: 560px;
+  line-height: 1.6;
+}
+.header-stats {
+  display: flex; gap: 32px;
+  margin-top: 28px;
+}
+.stat-pill {
+  display: flex; align-items: center; gap: 8px;
+  background: rgba(245,239,230,0.08);
+  border: 1px solid rgba(245,239,230,0.12);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  color: rgba(245,239,230,0.75);
+}
+.stat-pill strong { color: var(--cream); font-weight: 600; }
+
+/* ─── MAIN LAYOUT ───────────────────────────────────────────────── */
+main {
+  position: relative; z-index: 1;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+/* ─── SECTION TITLE ─────────────────────────────────────────────── */
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--soil);
+  margin-bottom: 6px;
+  display: flex; align-items: center; gap: 10px;
+}
+.section-title .dot {
+  width: 8px; height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.section-subtitle {
+  font-size: 14px;
+  color: var(--bean);
+  margin-bottom: 24px;
+  padding-left: 18px;
+}
+
+/* ─── CARD ──────────────────────────────────────────────────────── */
+.card {
+  background: white;
+  border-radius: var(--r-lg);
+  border: 1px solid rgba(92,58,30,0.1);
+  box-shadow: 0 2px 20px var(--shadow);
+  overflow: hidden;
+}
+.card-header {
+  padding: 20px 28px 16px;
+  border-bottom: 1px solid var(--parchment);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.card-body { padding: 28px; }
+
+/* ─── INPUT TABLE ───────────────────────────────────────────────── */
+.input-section { margin-bottom: 32px; }
+.input-table-wrapper { overflow-x: auto; }
+
+.input-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.input-table thead th {
+  background: var(--parchment);
+  padding: 12px 16px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bean);
+  text-align: left;
+  border-bottom: 2px solid rgba(92,58,30,0.12);
+}
+.input-table thead th:first-child { border-radius: var(--r-sm) 0 0 0; }
+.input-table thead th:last-child  { border-radius: 0 var(--r-sm) 0 0; text-align: center; }
+
+.input-table tbody tr {
+  transition: background var(--t);
+}
+.input-table tbody tr:hover { background: var(--mist); }
+.input-table tbody td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--parchment);
+  vertical-align: middle;
+}
+
+.row-num {
+  width: 36px; height: 36px;
+  background: var(--parchment);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bean);
+  font-family: 'DM Mono', monospace;
+}
+
+/* ─── FORM CONTROLS ─────────────────────────────────────────────── */
+select, input[type="number"], input[type="text"] {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--parchment);
+  border-radius: var(--r-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: var(--soil);
+  background: white;
+  transition: border-color var(--t), box-shadow var(--t);
+  appearance: none;
+}
+select {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235C3A1E' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  cursor: pointer;
+}
+select:focus, input:focus {
+  outline: none;
+  border-color: var(--bean);
+  box-shadow: 0 0 0 3px rgba(139,94,60,0.12);
+}
+input[type="number"] { font-family: 'DM Mono', monospace; }
+
+/* ─── BUTTONS ───────────────────────────────────────────────────── */
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 20px;
+  border: none; border-radius: var(--r-sm);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px; font-weight: 600;
+  cursor: pointer;
+  transition: all var(--t);
+  text-decoration: none;
+}
+.btn-primary {
+  background: var(--soil);
+  color: var(--cream);
+  padding: 14px 32px;
+  border-radius: var(--r-md);
+  font-size: 15px;
+  box-shadow: 0 4px 16px rgba(44,26,14,0.25);
+}
+.btn-primary:hover {
+  background: var(--bark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(44,26,14,0.32);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-primary:disabled {
+  opacity: 0.5; cursor: not-allowed;
+  transform: none; box-shadow: none;
+}
+.btn-add {
+  background: var(--sprout);
+  color: white;
+}
+.btn-add:hover { background: var(--leaf); }
+.btn-remove {
+  width: 32px; height: 32px;
+  padding: 0;
+  background: transparent;
+  color: var(--bean);
+  border: 1.5px solid var(--parchment);
+  border-radius: var(--r-sm);
+  justify-content: center;
+  font-size: 16px;
+}
+.btn-remove:hover { background: #fee; border-color: #f88; color: #c33; }
+.btn-secondary {
+  background: var(--parchment);
+  color: var(--soil);
+  border: 1.5px solid rgba(92,58,30,0.15);
+}
+.btn-secondary:hover { background: var(--cream); }
+
+.actions-row {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  margin-top: 20px;
+}
+
+/* ─── LOADING ───────────────────────────────────────────────────── */
+.loading-overlay {
+  display: none;
+  position: fixed; inset: 0; z-index: 100;
+  background: rgba(245,239,230,0.85);
+  backdrop-filter: blur(4px);
+  align-items: center; justify-content: center;
+  flex-direction: column; gap: 16px;
+}
+.loading-overlay.active { display: flex; }
+.loader {
+  width: 48px; height: 48px;
+  border: 3px solid var(--parchment);
+  border-top-color: var(--bark);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.loading-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: var(--soil);
+}
+.loading-sub {
+  font-size: 13px;
+  color: var(--bean);
+}
+
+/* ─── RESULTS SECTION ───────────────────────────────────────────── */
+#results-section {
+  display: none;
+  animation: fadeUp 0.5s ease forwards;
+}
+#results-section.visible { display: block; }
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ─── RESULT CARD ───────────────────────────────────────────────── */
+.result-card {
+  background: white;
+  border-radius: var(--r-xl);
+  border: 1px solid rgba(92,58,30,0.1);
+  box-shadow: 0 4px 32px var(--shadow);
+  margin-bottom: 32px;
+  overflow: hidden;
+  animation: fadeUp 0.4s ease forwards;
+}
+.result-card-header {
+  background: linear-gradient(135deg, var(--soil) 0%, var(--bark) 100%);
+  color: var(--cream);
+  padding: 24px 32px;
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 16px;
+  flex-wrap: wrap;
+}
+.result-village {
+  font-family: 'Playfair Display', serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+.result-meta {
+  font-size: 13px;
+  color: rgba(245,239,230,0.65);
+  display: flex; gap: 16px; flex-wrap: wrap;
+}
+.result-meta span { display: flex; align-items: center; gap: 5px; }
+
+.prediction-pills {
+  display: flex; gap: 12px; flex-wrap: wrap;
+}
+.pred-pill {
+  background: rgba(245,239,230,0.1);
+  border: 1px solid rgba(245,239,230,0.2);
+  border-radius: var(--r-md);
+  padding: 10px 18px;
+  text-align: center;
+  min-width: 140px;
+  backdrop-filter: blur(8px);
+}
+.pred-pill .pill-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(245,239,230,0.55);
+  margin-bottom: 4px;
+}
+.pred-pill .pill-model {
+  font-size: 10px;
+  color: rgba(245,239,230,0.4);
+  margin-bottom: 6px;
+}
+.pred-pill .pill-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--cream);
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.pred-pill .pill-unit {
+  font-size: 11px;
+  color: rgba(245,239,230,0.5);
+}
+.pred-pill.highlight {
+  background: rgba(200,151,58,0.25);
+  border-color: rgba(200,151,58,0.5);
+}
+.pred-pill.highlight .pill-value { color: var(--gold); }
+
+/* ─── CLIMATE DISPLAY ───────────────────────────────────────────── */
+.result-body { padding: 28px 32px 32px; }
+
+.climate-heading {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--bean);
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--parchment);
+  display: flex; align-items: center; gap: 8px;
+}
+.climate-year-tag {
+  background: var(--parchment);
+  color: var(--bark);
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.climate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+  margin-bottom: 28px;
+}
+.climate-card {
+  background: var(--mist);
+  border: 1px solid rgba(92,58,30,0.08);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  transition: all var(--t);
+  cursor: default;
+}
+.climate-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px var(--shadow);
+  background: white;
+}
+.climate-card .cc-icon {
+  font-size: 22px;
+  margin-bottom: 8px;
+  display: block;
+  line-height: 1;
+}
+.climate-card .cc-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--bean);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+.climate-card .cc-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--soil);
+  line-height: 1.1;
+}
+.climate-card .cc-unit {
+  font-size: 11px;
+  color: var(--bean);
+  font-weight: 400;
+  margin-left: 2px;
+}
+.climate-card .cc-desc {
+  font-size: 11px;
+  color: rgba(92,58,30,0.5);
+  margin-top: 4px;
+  line-height: 1.4;
+}
+
+/* ─── QUARTERLY TABLE ───────────────────────────────────────────── */
+.quarterly-title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--bean);
+  margin-bottom: 12px;
+}
+.quarterly-tabs {
+  display: flex; gap: 8px; margin-bottom: 12px;
+}
+.q-tab {
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer;
+  background: var(--parchment);
+  color: var(--bean);
+  border: none;
+  transition: all var(--t);
+}
+.q-tab.active {
+  background: var(--soil);
+  color: var(--cream);
+}
+.q-tab:hover:not(.active) { background: var(--cream); }
+
+.quarterly-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 8px;
+}
+.q-item {
+  background: var(--mist);
+  border-radius: var(--r-sm);
+  padding: 10px 12px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.q-item-label { font-size: 12px; color: var(--bean); }
+.q-item-value {
+  font-family: 'DM Mono', monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--soil);
+}
+.q3-badge {
+  display: inline-block;
+  background: var(--gold);
+  color: var(--soil);
+  font-size: 9px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+/* ─── SUMMARY BANNER ────────────────────────────────────────────── */
+.summary-banner {
+  background: linear-gradient(135deg, var(--moss) 0%, var(--leaf) 100%);
+  border-radius: var(--r-lg);
+  padding: 24px 32px;
+  color: white;
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 16px;
+  margin-bottom: 32px;
+  box-shadow: 0 4px 20px rgba(61,90,62,0.3);
+}
+.summary-banner h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  margin-bottom: 4px;
+}
+.summary-banner p {
+  font-size: 13px;
+  opacity: 0.8;
+}
+.summary-total {
+  text-align: right;
+}
+.summary-total .big-num {
+  font-family: 'DM Mono', monospace;
+  font-size: 36px;
+  font-weight: 500;
+  line-height: 1;
+}
+.summary-total .big-label {
+  font-size: 12px;
+  opacity: 0.7;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ─── DATA SOURCE TAG ───────────────────────────────────────────── */
+.source-tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  font-weight: 500;
+}
+.source-tag.csv {
+  background: #e6f4ea;
+  color: #1a6e2f;
+}
+.source-tag.cache {
+  background: #fff3cd;
+  color: #856404;
+}
+.source-tag.gee {
+  background: #cce5ff;
+  color: #004085;
+}
+
+/* ─── ERROR ─────────────────────────────────────────────────────── */
+.error-box {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: var(--r-md);
+  padding: 16px 20px;
+  color: #991b1b;
+  font-size: 14px;
+  margin-bottom: 16px;
+  display: flex; gap: 10px; align-items: flex-start;
+}
+
+/* ─── FOOTER ────────────────────────────────────────────────────── */
+footer {
+  background: var(--soil);
+  color: rgba(245,239,230,0.45);
+  text-align: center;
+  padding: 24px;
+  font-size: 13px;
+}
+footer strong { color: rgba(245,239,230,0.7); }
+
+/* ─── RESPONSIVE ─────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  header { padding: 32px 20px 40px; }
+  .header-stats { flex-wrap: wrap; gap: 10px; }
+  main { padding: 28px 16px 60px; }
+  .result-card-header { padding: 20px; }
+  .result-body { padding: 20px; }
+  .prediction-pills { flex-direction: column; }
+  .pred-pill { min-width: unset; }
+  .summary-total { text-align: left; }
+}
+</style>
+</head>
+<body>
+
+<!-- LOADING OVERLAY -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loader"></div>
+  <div class="loading-text">Memproses Prediksi...</div>
+  <div class="loading-sub" id="loadingStatus">Mengambil data iklim dan menjalankan model</div>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="header-inner">
+    <div class="header-badge">Kabupaten Bener Meriah · Aceh</div>
+    <h1>Prediksi Produksi<br><em>Kopi Arabika</em></h1>
+    <p>Sistem prediksi berbasis Machine Learning (XGBoost & Random Forest) menggunakan data iklim ERA5-Land per desa. Masukkan desa dan luas lahan untuk mendapatkan estimasi produksi.</p>
+    <div class="header-stats">
+      <div class="stat-pill">🏘️ <strong id="villageCount">—</strong> Desa</div>
+      <div class="stat-pill">🤖 XGBoost + Random Forest</div>
+      <div class="stat-pill">📊 MAPE <strong>4,11%</strong></div>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main>
+
+  <!-- INPUT SECTION -->
+  <section class="input-section">
+    <div class="section-title"><span class="dot"></span>Input Prediksi</div>
+    <div class="section-subtitle">Tambahkan beberapa desa sekaligus. Pilih desa, tahun panen, dan luas Tanaman Menghasilkan (TM).</div>
+
+    <div class="card">
+      <div class="card-body">
+        <div class="input-table-wrapper">
+          <table class="input-table" id="inputTable">
+            <thead>
+              <tr>
+                <th style="width:40px">#</th>
+                <th style="min-width:220px">Desa / Kelurahan</th>
+                <th style="width:120px">Tahun Panen</th>
+                <th style="width:160px">Luas TM (ha)</th>
+                <th style="width:50px"></th>
+              </tr>
+            </thead>
+            <tbody id="inputBody">
+              <!-- rows injected by JS -->
+            </tbody>
+          </table>
+        </div>
+
+        <div class="actions-row">
+          <button class="btn btn-add" onclick="addRow()">
+            + Tambah Desa
+          </button>
+          <div style="display:flex;gap:12px;align-items:center">
+            <button class="btn btn-secondary" onclick="clearAll()">Bersihkan</button>
+            <button class="btn btn-primary" id="predictBtn" onclick="runPredict()">
+              ☕ Prediksi Produksi
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ERROR -->
+  <div id="errorBox" style="display:none"></div>
+
+  <!-- RESULTS SECTION -->
+  <section id="results-section">
+    <!-- Summary banner -->
+    <div class="summary-banner" id="summaryBanner">
+      <div>
+        <h3>Ringkasan Prediksi</h3>
+        <p id="summaryDesc">—</p>
+      </div>
+      <div class="summary-total">
+        <div class="big-num" id="summaryTotal">—</div>
+        <div class="big-label">Total Produksi (XGBoost)</div>
+      </div>
+    </div>
+
+    <!-- Per-village result cards -->
+    <div id="resultCards"></div>
+  </section>
+
+</main>
+
+<footer>
+  <strong>Sistem Prediksi Kopi Arabika Bener Meriah</strong> ·
+  Data iklim: ERA5-Land (ECMWF) via Google Earth Engine ·
+  Model: XGBoost (R²=0.87, MAPE=4.11%) & Random Forest
+</footer>
+
+<script>
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let VILLAGES = [];
+let rowCount  = 0;
+
+// ─── INIT ────────────────────────────────────────────────────────────────────
+async function init() {
+  try {
+    const res  = await fetch('/api/villages');
+    const data = await res.json();
+    VILLAGES   = data.villages || [];
+    document.getElementById('villageCount').textContent = VILLAGES.length;
+  } catch(e) {
+    console.warn('Could not load villages:', e);
+  }
+  addRow();
+  addRow();
+}
+
+// ─── ADD ROW ─────────────────────────────────────────────────────────────────
+function addRow() {
+  rowCount++;
+  const tbody = document.getElementById('inputBody');
+  const tr    = document.createElement('tr');
+  tr.id = `row-${rowCount}`;
+  const currentYear = new Date().getFullYear();
+
+  const villageOptions = VILLAGES.length
+    ? VILLAGES.map(v => `<option value="${v}">${v}</option>`).join('')
+    : '<option value="">Memuat desa...</option>';
+
+  tr.innerHTML = `
+    <td><div class="row-num">${rowCount}</div></td>
+    <td>
+      <select id="village-${rowCount}" required>
+        <option value="">— Pilih Desa —</option>
+        ${villageOptions}
+      </select>
+    </td>
+    <td>
+      <input type="number" id="year-${rowCount}"
+        value="${currentYear}" min="2021" max="2030" step="1">
+    </td>
+    <td>
+      <input type="number" id="luas-${rowCount}"
+        placeholder="cth: 5.50" min="0.01" step="0.01">
+    </td>
+    <td style="text-align:center">
+      <button class="btn btn-remove" onclick="removeRow(${rowCount})" title="Hapus baris">×</button>
+    </td>
+  `;
+  tbody.appendChild(tr);
+
+  // Animate in
+  tr.style.opacity = '0';
+  tr.style.transform = 'translateX(-10px)';
+  requestAnimationFrame(() => {
+    tr.style.transition = 'opacity 0.25s, transform 0.25s';
+    tr.style.opacity    = '1';
+    tr.style.transform  = 'translateX(0)';
+  });
+}
+
+// ─── REMOVE ROW ──────────────────────────────────────────────────────────────
+function removeRow(id) {
+  const tr = document.getElementById(`row-${id}`);
+  if (!tr) return;
+  const tbody = document.getElementById('inputBody');
+  if (tbody.children.length <= 1) { alert('Minimal harus ada satu baris.'); return; }
+  tr.style.transition = 'opacity 0.2s, transform 0.2s';
+  tr.style.opacity    = '0';
+  tr.style.transform  = 'translateX(10px)';
+  setTimeout(() => tr.remove(), 220);
+}
+
+// ─── CLEAR ALL ───────────────────────────────────────────────────────────────
+function clearAll() {
+  document.getElementById('inputBody').innerHTML = '';
+  document.getElementById('results-section').classList.remove('visible');
+  document.getElementById('errorBox').style.display = 'none';
+  rowCount = 0;
+  addRow();
+}
+
+// ─── COLLECT INPUT ───────────────────────────────────────────────────────────
+function collectRows() {
+  const tbody = document.getElementById('inputBody');
+  const rows  = [];
+  for (const tr of tbody.children) {
+    const id      = tr.id.split('-')[1];
+    const village = document.getElementById(`village-${id}`)?.value?.trim();
+    const year    = parseInt(document.getElementById(`year-${id}`)?.value);
+    const luas    = parseFloat(document.getElementById(`luas-${id}`)?.value);
+
+    if (!village) throw new Error(`Baris ${id}: Pilih nama desa.`);
+    if (!year || year < 2021) throw new Error(`Baris ${id}: Tahun tidak valid (min 2021).`);
+    if (!luas  || luas <= 0)  throw new Error(`Baris ${id}: Luas TM harus lebih dari 0.`);
+
+    rows.push({ village, year, luas_ha: luas });
+  }
+  return rows;
+}
+
+// ─── RUN PREDICT ─────────────────────────────────────────────────────────────
+async function runPredict() {
+  const btn = document.getElementById('predictBtn');
+  hideError();
+
+  let rows;
+  try {
+    rows = collectRows();
+  } catch(e) {
+    showError(e.message);
+    return;
+  }
+
+  btn.disabled = true;
+  showLoading('Mengambil data iklim dan menjalankan model prediksi...');
+
+  try {
+    const res  = await fetch('/api/predict', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify({ rows }),
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Terjadi kesalahan pada server.');
+    }
+
+    const data = await res.json();
+    renderResults(data.results);
+
+  } catch(e) {
+    showError(e.message);
+  } finally {
+    btn.disabled = false;
+    hideLoading();
+  }
+}
+
+// ─── RENDER RESULTS ──────────────────────────────────────────────────────────
+function renderResults(results) {
+  const section = document.getElementById('results-section');
+  const cards   = document.getElementById('resultCards');
+  section.classList.remove('visible');
+  cards.innerHTML = '';
+
+  // Summary
+  const totalXGB = results.reduce((sum, r) => {
+    const p = r.predictions?.['XGBoost'];
+    return sum + (p ? p.total_kg : 0);
+  }, 0);
+  document.getElementById('summaryTotal').textContent =
+    totalXGB >= 1000
+      ? (totalXGB / 1000).toFixed(2) + ' ton'
+      : totalXGB.toFixed(0) + ' kg';
+  document.getElementById('summaryDesc').textContent =
+    `${results.length} desa · Tahun panen ${[...new Set(results.map(r => r.prod_year))].join(', ')}`;
+
+  // Per-village cards
+  results.forEach((r, i) => {
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    card.style.animationDelay = `${i * 0.1}s`;
+    card.innerHTML = buildResultCard(r);
+    cards.appendChild(card);
+  });
+
+  section.classList.add('visible');
+  section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Init quarterly tabs
+  results.forEach((_, i) => initQuarterlyTabs(i));
+}
+
+// ─── BUILD RESULT CARD ───────────────────────────────────────────────────────
+function buildResultCard(r) {
+  const xgb = r.predictions?.['XGBoost'];
+  const rf  = r.predictions?.['Random Forest'];
+  const src = r.data_source || 'csv';
+
+  const srcTag = src === 'cache'
+    ? '<span class="source-tag cache">📦 Cache</span>'
+    : src === 'gee'
+    ? '<span class="source-tag gee">🛰️ GEE Live</span>'
+    : '<span class="source-tag csv">📁 CSV Pre-extracted</span>';
+
+  const predPills = `
+    ${xgb ? `
+    <div class="pred-pill highlight">
+      <div class="pill-label">Yield</div>
+      <div class="pill-model">XGBoost ★</div>
+      <div class="pill-value">${xgb.yield_kg_ha.toFixed(1)}</div>
+      <div class="pill-unit">kg/ha</div>
+    </div>
+    <div class="pred-pill highlight">
+      <div class="pill-label">Total Produksi</div>
+      <div class="pill-model">XGBoost ★</div>
+      <div class="pill-value">${xgb.total_ton.toFixed(3)}</div>
+      <div class="pill-unit">ton (${xgb.total_kg.toFixed(0)} kg)</div>
+    </div>` : ''}
+    ${rf ? `
+    <div class="pred-pill">
+      <div class="pill-label">Yield</div>
+      <div class="pill-model">Random Forest</div>
+      <div class="pill-value">${rf.yield_kg_ha.toFixed(1)}</div>
+      <div class="pill-unit">kg/ha</div>
+    </div>
+    <div class="pred-pill">
+      <div class="pill-label">Total Produksi</div>
+      <div class="pill-model">Random Forest</div>
+      <div class="pill-value">${rf.total_ton.toFixed(3)}</div>
+      <div class="pill-unit">ton (${rf.total_kg.toFixed(0)} kg)</div>
+    </div>` : ''}
+  `;
+
+  const climateCards = (r.climate_annual || []).map(c => `
+    <div class="climate-card">
+      <span class="cc-icon">${c.icon}</span>
+      <div class="cc-label">${c.label}</div>
+      <div class="cc-value">${c.value}<span class="cc-unit">${c.unit}</span></div>
+      <div class="cc-desc">${c.desc}</div>
+    </div>
+  `).join('');
+
+  const quarterly = r.climate_quarterly || {};
+  const qLabels = {
+    'rainfall_mm': 'Curah Hujan',
+    'temperature_celsius': 'Suhu',
+    'relative_humidity_percent': 'Kelembaban',
+    'soil_moisture_percent': 'Kadar Air Tanah',
+    'wind_speed_10m': 'Kec. Angin',
+    'dtr_celsius': 'DTR',
+    'vpd_kpa': 'VPD',
+    'net_solar_rad_kwh_m2': 'Radiasi',
+  };
+  const qUnits = {
+    'rainfall_mm': 'mm', 'temperature_celsius': '°C',
+    'relative_humidity_percent': '%', 'soil_moisture_percent': '%',
+    'wind_speed_10m': 'm/s', 'dtr_celsius': '°C',
+    'vpd_kpa': 'kPa', 'net_solar_rad_kwh_m2': 'kWh/m²',
+  };
+
+  const cardIdx = document.querySelectorAll('.result-card').length;
+  const qTabsHTML = [1,2,3,4].map(q => `
+    <button class="q-tab ${q===3?'active':''}"
+      onclick="switchQTab(${cardIdx},${q})" id="qtab-${cardIdx}-${q}">
+      Q${q}${q===3?' <span class="q3-badge">KRITIS</span>':''}
+    </button>
+  `).join('');
+
+  const buildQGrid = (qNum) => {
+    const qData = quarterly[`Q${qNum}`] || {};
+    return Object.entries(qLabels).map(([k, label]) => `
+      <div class="q-item">
+        <span class="q-item-label">${label}</span>
+        <span class="q-item-value">${qData[k] !== undefined ? qData[k].toFixed(2) : '—'} <small style="opacity:.5">${qUnits[k]||''}</small></span>
+      </div>
+    `).join('');
+  };
+
+  const qGridsHTML = [1,2,3,4].map(q => `
+    <div id="qgrid-${cardIdx}-${q}" style="display:${q===3?'grid':'none'}"
+      class="quarterly-grid">${buildQGrid(q)}</div>
+  `).join('');
+
+  return `
+    <div class="result-card-header">
+      <div>
+        <div class="result-village">${r.village}</div>
+        <div class="result-meta">
+          <span>📅 Tahun Panen: <strong>${r.prod_year}</strong></span>
+          <span>🌿 Luas TM: <strong>${r.luas_ha} ha</strong></span>
+          <span>📈 Yield Sebelumnya: <strong>${r.prev_yield} kg/ha</strong></span>
+          <span>${srcTag}</span>
+        </div>
+      </div>
+      <div class="prediction-pills">${predPills}</div>
+    </div>
+    <div class="result-body">
+      <div class="climate-heading">
+        🌦️ Data Iklim Rata-rata
+        <span class="climate-year-tag">Tahun ${r.climate_year}</span>
+      </div>
+      <div class="climate-grid">${climateCards}</div>
+
+      <div class="climate-heading" style="margin-top:8px">
+        📆 Rata-rata Per Kuartal
+      </div>
+      <div class="quarterly-tabs">${qTabsHTML}</div>
+      ${qGridsHTML}
+    </div>
+  `;
+}
+
+// ─── QUARTERLY TABS ───────────────────────────────────────────────────────────
+function switchQTab(cardIdx, qNum) {
+  [1,2,3,4].forEach(q => {
+    const tab  = document.getElementById(`qtab-${cardIdx}-${q}`);
+    const grid = document.getElementById(`qgrid-${cardIdx}-${q}`);
+    if (!tab || !grid) return;
+    const active = q === qNum;
+    tab.classList.toggle('active', active);
+    grid.style.display = active ? 'grid' : 'none';
+  });
+}
+
+function initQuarterlyTabs(idx) {
+  // Q3 is active by default — nothing to do
+}
+
+// ─── LOADING ─────────────────────────────────────────────────────────────────
+function showLoading(msg) {
+  document.getElementById('loadingStatus').textContent = msg || '';
+  document.getElementById('loadingOverlay').classList.add('active');
+}
+function hideLoading() {
+  document.getElementById('loadingOverlay').classList.remove('active');
+}
+
+// ─── ERROR ───────────────────────────────────────────────────────────────────
+function showError(msg) {
+  const box = document.getElementById('errorBox');
+  box.style.display = 'block';
+  box.innerHTML = `<div class="error-box">⚠️ <span>${msg}</span></div>`;
+  box.scrollIntoView({ behavior: 'smooth' });
+}
+function hideError() {
+  document.getElementById('errorBox').style.display = 'none';
+}
+
+// ─── BOOT ─────────────────────────────────────────────────────────────────────
+init();
+</script>
+</body>
+</html>
