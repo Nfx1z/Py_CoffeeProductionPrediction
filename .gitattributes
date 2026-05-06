@@ -1,1 +1,2 @@
 *.csv filter=lfs diff=lfs merge=lfs -text
+coffee_yield_pipeline.xlsx filter=lfs diff=lfs merge=lfs -text
