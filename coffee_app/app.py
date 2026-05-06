@@ -29,7 +29,7 @@ log = logging.getLogger(__name__)
 # ─────────────────────────────────────────────────────────────────────────────
 BASE_DIR        = Path(__file__).parent
 CLIMATE_CSV     = BASE_DIR / "result" / "climateData_BenerMeriah_2020-01-01_2024-12-31.csv"
-PRODUCTION_CSV  = BASE_DIR / "coffee_production_bener_meriah.csv"
+PRODUCTION_CSV  = BASE_DIR / "coffeeProduction_benerMeriah.csv"
 MODEL_PATH      = BASE_DIR / "result" / "best_model.pkl"
 RF_MODEL_PATH   = BASE_DIR / "result" / "rf_model.pkl"
 FEATURES_PATH   = BASE_DIR / "result" / "features.csv"
