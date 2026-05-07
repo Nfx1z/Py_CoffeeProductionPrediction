@@ -1,9 +1,8 @@
 """
 Kopi Arabika Yield Prediction API
-FastAPI backend — handles GEE fetch, caching, and model inference
+FastAPI backend — handles caching and model inference
 """
 
-import os
 import json
 import logging
 import warnings
@@ -17,10 +16,9 @@ from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
-from dotenv import load_dotenv
 from villages import locations
 warnings.filterwarnings("ignore")
-load_dotenv()
+
 logging.basicConfig(level=logging.INFO)
 log = logging.getLogger(__name__)
 
@@ -36,7 +34,6 @@ FEATURES_PATH   = BASE_DIR / "result" / "features.csv"
 MEDIAN_PATH     = BASE_DIR / "result" / "train_feature_median.csv"
 CACHE_PATH      = BASE_DIR / "climate_cache.json"
 
-GEE_PROJECT     = os.getenv("GEE_PROJECT_ID", "")
 
 CLIMATE_BASE_VARS = [
     "rainfall_mm", "temperature_celsius", "relative_humidity_percent",
@@ -209,15 +206,7 @@ def aggregate_climate(village_lower: str, climate_year: int) -> Optional[dict]:
             log.info(f"CSV hit: {cache_key} ({len(subset)} days)")
             return result
 
-    # 3. Fetch from GEE
-    if GEE_PROJECT:
-        log.info(f"GEE fetch: {cache_key}")
-        result = fetch_from_gee(village_lower, climate_year)
-        if result:
-            ASSETS["cache"][cache_key] = result
-            save_cache()
-            return result
-
+    log.warning(f"No climate data found for {village_lower} in {climate_year}")
     return None
 
 
@@ -248,117 +237,10 @@ def _build_features_from_daily(df: pd.DataFrame) -> dict:
 
     return result
 
-
-def fetch_from_gee(village_lower: str, climate_year: int) -> Optional[dict]:
-    """Fetch daily climate data from GEE for a specific village/year."""
-    try:
-        import ee
-        ee.Initialize(project=GEE_PROJECT)
-
-        # ─────────────────────────────────────────────────────
-        # 1. PRIORITAS: Lookup koordinat dari villages.py
-        # ─────────────────────────────────────────────────────
-        lat, lon = None, None
-        
-        for loc in locations:
-            # Normalisasi nama untuk pencocokan (case-insensitive)
-            loc_name = loc.get('name', '').strip().lower()
-            if loc_name == village_lower:
-                # Perhatikan: kunci adalah 'lat' dan 'lon'
-                lat = loc.get('lat')
-                lon = loc.get('lon')
-                log.info(f"Coordinates found in villages.py: {loc.get('name')} -> [{lon}, {lat}]")
-                break
-        
-        # ─────────────────────────────────────────────────────
-        # 2. FALLBACK: Jika tidak ditemukan, cek climate_df CSV
-        # ─────────────────────────────────────────────────────
-        if (lat is None or lon is None) and "climate_df" in ASSETS:
-            clim = ASSETS["climate_df"]
-            coord_row = clim[clim["location"] == village_lower]
-            if not coord_row.empty and "latitude" in clim.columns:
-                lat = float(coord_row["latitude"].iloc[0])
-                lon = float(coord_row["longitude"].iloc[0])
-                log.info(f"Coordinates fallback to climate_df: [{lon}, {lat}]")
-
-        # Validasi akhir
-        if lat is None or lon is None:
-            log.error(f"Coordinate lookup failed for village: {village_lower}")
-            raise ValueError(f"Koordinat untuk desa '{village_lower}' tidak ditemukan.")
-
-        # ─────────────────────────────────────────────────────
-        # 3. Eksekusi GEE (Perhatikan urutan [lon, lat])
-        # ─────────────────────────────────────────────────────
-        start = f"{climate_year}-01-01"
-        end   = f"{climate_year}-12-31"
-        
-        era5 = ee.ImageCollection("ECMWF/ERA5_LAND/DAILY_AGGR")
-        
-        # GEE Geometry Point membutuhkan [Longitude, Latitude]
-        point = ee.Geometry.Point([lon, lat])
-
-        def extract(image):
-            vals = image.reduceRegion(
-                reducer=ee.Reducer.mean(), geometry=point, scale=11132)
-            date = ee.Date(image.get("system:time_start"))
-            return ee.Feature(None, {
-                "date":         date.format("YYYY-MM-dd"),
-                "quarter":      date.getRelative("month", "year").divide(3).floor().add(1),
-                "rainfall_mm":  ee.Number(vals.get("total_precipitation_sum")).multiply(1000),
-                "temperature_celsius": ee.Number(vals.get("temperature_2m")).subtract(273.15),
-                "temperature_2m_max":  ee.Number(vals.get("temperature_2m_max")).subtract(273.15),
-                "temperature_2m_min":  ee.Number(vals.get("temperature_2m_min")).subtract(273.15),
-                "dewpoint_celsius":    ee.Number(vals.get("dewpoint_temperature_2m")).subtract(273.15),
-                "soil_moisture_percent": ee.Number(vals.get("volumetric_soil_water_layer_1")).multiply(100),
-                "net_solar_rad_kwh_m2":  ee.Number(vals.get("surface_net_solar_radiation_sum")).divide(3600000),
-                "u_wind": vals.get("u_component_of_wind_10m"),
-                "v_wind": vals.get("v_component_of_wind_10m"),
-            })
-
-        features = era5.filterDate(start, end).map(extract).toList(400)
-        data = features.getInfo()
-
-        rows = []
-        for feat in data:
-            p = feat["properties"]
-            T  = p.get("temperature_celsius", 20)
-            Td = p.get("dewpoint_celsius", 16)
-            u  = p.get("u_wind", 0) or 0
-            v  = p.get("v_wind", 0) or 0
-
-            # Derived variables
-            import math
-            rh  = 100 * math.exp((17.27 * Td / (237.7 + Td)) - (17.27 * T / (237.7 + T)))
-            es  = 0.6108 * math.exp(17.27 * T / (T + 237.3))
-            ea  = 0.6108 * math.exp(17.27 * Td / (Td + 237.3))
-            vpd = max(0, es - ea)
-            ws  = math.sqrt(u**2 + v**2)
-            dtr = abs(p.get("temperature_2m_max", T + 4) - p.get("temperature_2m_min", T - 4))
-
-            rows.append({
-                "quarter":                      int(p.get("quarter", 1)),
-                "rainfall_mm":                  p.get("rainfall_mm", 0) or 0,
-                "temperature_celsius":          T,
-                "relative_humidity_percent":    rh,
-                "soil_moisture_percent":        p.get("soil_moisture_percent", 40),
-                "wind_speed_10m":               ws,
-                "dtr_celsius":                  dtr,
-                "vpd_kpa":                      vpd,
-                "net_solar_rad_kwh_m2":         p.get("net_solar_rad_kwh_m2", 4),
-            })
-
-        df_gee = pd.DataFrame(rows)
-        return _build_features_from_daily(df_gee)
-
-    except Exception as e:
-        log.error(f"GEE fetch failed for {village_lower}/{climate_year}: {e}")
-        return None
-
-
 # ─────────────────────────────────────────────────────────────────────────────
 # PREDICTION
 # ─────────────────────────────────────────────────────────────────────────────
-def predict_yield(village: str, prod_year: int, luas_ha: float) -> dict:
+"""def predict_yield(village: str, prod_year: int, luas_ha: float) -> dict:
     climate_year  = prod_year - 1
     village_lower = village.strip().lower()
 
@@ -466,8 +348,201 @@ def predict_yield(village: str, prod_year: int, luas_ha: float) -> dict:
         "climate_quarterly": quarterly,
         "data_source":    "cache" if f"{village_lower}::{climate_year}" in ASSETS.get("cache", {}) else "csv",
     }
+"""
+def predict_yield(village: str, prod_year: int, luas_ha: float) -> dict:
+    climate_year  = prod_year - 1
+    village_lower = village.strip().lower()
+    MIN_VALID_YIELD = 100.0  # Must match training data filter
 
+    # ─────────────────────────────────────────────────────
+    # 1. VALIDATE: Does this village have VALID production data?
+    # ─────────────────────────────────────────────────────
+    if "prod_df" not in ASSETS or ASSETS["prod_df"] is None:
+        raise HTTPException(
+            status_code=503,
+            detail={
+                "error": "production_data_unavailable",
+                "message": "Sistem data produksi sedang tidak tersedia.",
+                "reason": "Gagal memuat file data produksi. Silakan coba beberapa saat lagi.",
+                "suggestion": "Hubungi administrator jika masalah berlanjut."
+            }
+        )
 
+    prod = ASSETS["prod_df"]
+    village_data = prod[prod["village"] == village_lower]
+    
+    # Case A: Village not found in production dataset at all
+    if village_data.empty:
+        available = get_village_list()
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "error": "village_not_in_production_data",
+                "message": f"Data produksi untuk desa '{village.title()}' belum tersedia.",
+                "reason": "Desa ini tidak memiliki catatan produksi kopi Arabika dalam database sistem.",
+                "suggestion": "Silakan pilih desa lain dari daftar yang tersedia.",
+                "available_villages_count": len(available),
+                "requested_village": village.title()
+            }
+        )
+    
+    # Case B: Village exists but ALL yields are below threshold
+    valid_records = village_data[village_data["yield_kg_ha"] >= MIN_VALID_YIELD]
+    if valid_records.empty:
+        max_yield = village_data["yield_kg_ha"].max()
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "error": "village_yield_below_threshold",
+                "message": f"Data produksi desa '{village.title()}' tidak memenuhi kriteria validasi.",
+                "reason": f"Semua catatan produksi desa ini memiliki yield < {MIN_VALID_YIELD:.0f} kg/ha (maks: {max_yield:.1f} kg/ha).",
+                "suggestion": "Model ini dilatih hanya dengan data desa produktivitas ≥ 100 kg/ha untuk akurasi prediksi.",
+                "threshold_kg_ha": MIN_VALID_YIELD,
+                "village_max_yield_kg_ha": round(max_yield, 1)
+            }
+        )
+
+    # ─────────────────────────────────────────────────────
+    # 2. Get climate data
+    # ─────────────────────────────────────────────────────
+    climate_data = aggregate_climate(village_lower, climate_year)
+    if not climate_data:
+        raise HTTPException(
+            status_code=404,
+            detail={
+                "error": "climate_data_unavailable",
+                "message": f"Data iklim untuk desa '{village}' tahun {climate_year} tidak tersedia.",
+                "reason": "Tidak ada data iklim harian yang cukup untuk desa dan tahun tersebut.",
+                "suggestion": "Pilih tahun lain atau desa dengan data iklim lengkap.",
+                "village": village.title(),
+                "climate_year": climate_year
+            }
+        )
+
+    # ─────────────────────────────────────────────────────
+    # 3. Get prev_yield with STRICT validation
+    # ─────────────────────────────────────────────────────
+    prev_yield = None
+    
+    # 3a. Try exact village + year match (must be valid)
+    prev_rows = prod[(prod["village"] == village_lower) & (prod["year"] == prod_year - 1)]
+    if not prev_rows.empty:
+        candidate = prev_rows["yield_kg_ha"].iloc[0]
+        if pd.notna(candidate) and candidate >= MIN_VALID_YIELD:
+            prev_yield = float(candidate)
+            log.info(f"✓ Using exact prev_yield for {village}/{prod_year-1}: {prev_yield:.2f}")
+    
+    # 3b. Fallback: village median from VALID records only
+    if prev_yield is None:
+        valid_village = prod[(prod["village"] == village_lower) & (prod["yield_kg_ha"] >= MIN_VALID_YIELD)]
+        if not valid_village.empty:
+            candidate = valid_village["yield_kg_ha"].median()
+            if pd.notna(candidate):
+                prev_yield = float(candidate)
+                log.warning(f"⚠ Using village median prev_yield for {village}: {prev_yield:.2f}")
+    
+    # 3c. Final fallback: global median from VALID records only
+    if prev_yield is None:
+        global_valid = prod[prod["yield_kg_ha"] >= MIN_VALID_YIELD]
+        if not global_valid.empty:
+            candidate = global_valid["yield_kg_ha"].median()
+            if pd.notna(candidate):
+                prev_yield = float(candidate)
+                log.warning(f"⚠ Using GLOBAL median prev_yield for {village}: {prev_yield:.2f}")
+
+    # If still None after all fallbacks, raise error
+    if prev_yield is None or prev_yield < MIN_VALID_YIELD:
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "error": "prev_yield_determination_failed",
+                "message": f"Gagal menentukan nilai prev_yield untuk prediksi desa '{village}'.",
+                "reason": "Tidak ada data produksi yang valid (≥ 100 kg/ha) ditemukan setelah mencoba semua metode fallback.",
+                "suggestion": "Laporkan masalah ini ke administrator dengan menyertakan nama desa dan tahun prediksi.",
+                "village": village.title(),
+                "prod_year": prod_year
+            }
+        )
+
+    climate_data["prev_yield_kg_ha"] = prev_yield
+
+    # ─────────────────────────────────────────────────────
+    # 4. Build feature vector & predict
+    # ─────────────────────────────────────────────────────
+    features     = ASSETS.get("features", [])
+    train_median = ASSETS.get("train_median", pd.Series(dtype=float))
+
+    feat_vec = {}
+    for f in features:
+        if f in climate_data:
+            feat_vec[f] = climate_data[f]
+        elif f in train_median.index:
+            feat_vec[f] = float(train_median[f])
+        else:
+            feat_vec[f] = 0.0
+
+    X = pd.DataFrame([feat_vec])[features].values
+
+    results = {}
+    for name, key in [("XGBoost", "best_model"), ("Random Forest", "rf_model")]:
+        model = ASSETS.get(key)
+        if model:
+            log_pred   = float(model.predict(X)[0])
+            yield_kgha = max(0, float(np.expm1(log_pred)))
+            total_kg   = yield_kgha * luas_ha
+            results[name] = {
+                "yield_kg_ha":    round(yield_kgha, 2),
+                "total_kg":       round(total_kg,   2),
+                "total_ton":      round(total_kg / 1000, 4),
+            }
+
+    # Build human-readable climate display
+    climate_display = []
+    for var in CLIMATE_BASE_VARS:
+        if var in climate_data and var in CLIMATE_LABELS:
+            meta  = CLIMATE_LABELS[var]
+            value = climate_data[var]
+            if var == "rainfall_mm":
+                formatted = f"{value:,.0f}"
+            elif var in ("temperature_celsius", "dtr_celsius"):
+                formatted = f"{value:.1f}"
+            elif var == "vpd_kpa":
+                formatted = f"{value:.3f}"
+            elif var == "wind_speed_10m":
+                formatted = f"{value:.2f}"
+            else:
+                formatted = f"{value:.1f}"
+            climate_display.append({
+                "var":       var,
+                "icon":      meta["icon"],
+                "label":     meta["label"],
+                "value":     formatted,
+                "unit":      meta["unit"],
+                "desc":      meta["desc"],
+                "raw_value": round(value, 4),
+            })
+
+    # Quarterly highlights
+    quarterly = {}
+    for q in [1, 2, 3, 4]:
+        quarterly[f"Q{q}"] = {}
+        for var in CLIMATE_BASE_VARS:
+            key_q = f"{var}_Q{q}"
+            if key_q in climate_data:
+                quarterly[f"Q{q}"][var] = round(climate_data[key_q], 3)
+
+    return {
+        "village":        village.title(),
+        "prod_year":      prod_year,
+        "climate_year":   climate_year,
+        "luas_ha":        luas_ha,
+        "prev_yield":     round(prev_yield, 2),
+        "predictions":    results,
+        "climate_annual": climate_display,
+        "climate_quarterly": quarterly,
+        "data_source":    "cache" if f"{village_lower}::{climate_year}" in ASSETS.get("cache", {}) else "csv",
+    }
+    
 # ─────────────────────────────────────────────────────────────────────────────
 # FASTAPI APP
 # ─────────────────────────────────────────────────────────────────────────────
@@ -524,5 +599,4 @@ def health():
         "climate_rows":  len(ASSETS.get("climate_df", pd.DataFrame())),
         "villages":      len(get_village_list()),
         "cache_entries": len(ASSETS.get("cache", {})),
-        "gee_configured": bool(GEE_PROJECT),
     }
