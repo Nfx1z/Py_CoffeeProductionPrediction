@@ -26,12 +26,12 @@ log = logging.getLogger(__name__)
 # CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
 BASE_DIR        = Path(__file__).parent
-CLIMATE_CSV     = BASE_DIR / "result" / "climateData_BenerMeriah_2020-01-01_2024-12-31.csv"
-PRODUCTION_CSV  = BASE_DIR / "coffeeProduction_benerMeriah.csv"
-MODEL_PATH      = BASE_DIR / "result" / "best_model.pkl"
-RF_MODEL_PATH   = BASE_DIR / "result" / "rf_model.pkl"
-FEATURES_PATH   = BASE_DIR / "result" / "features.csv"
-MEDIAN_PATH     = BASE_DIR / "result" / "train_feature_median.csv"
+CLIMATE_CSV     = BASE_DIR / "data" / "climateData_BenerMeriah_2020-01-01_2024-12-31.csv"
+PRODUCTION_CSV  = BASE_DIR / "data" / "coffeeProduction_benerMeriah.csv"
+MODEL_PATH      = BASE_DIR / "data" / "best_model.pkl"
+RF_MODEL_PATH   = BASE_DIR / "data" / "rf_model.pkl"
+FEATURES_PATH   = BASE_DIR / "data" / "features.csv"
+MEDIAN_PATH     = BASE_DIR / "data" / "train_feature_median.csv"
 CACHE_PATH      = BASE_DIR / "climate_cache.json"
 
 
