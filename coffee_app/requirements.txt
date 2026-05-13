@@ -1,9 +1,0 @@
-fastapi
-uvicorn[standard]
-python-dotenv
-pandas
-numpy
-joblib
-scikit-learn
-xgboost
-earthengine-api

@@ -135,7 +135,7 @@ locations = [
     {'name': 'Reje Guru', 'lon': 96.880569, 'lat': 4.719955},
     {'name': 'Mutiara Baru', 'lon': 96.832536, 'lat': 4.674667},
     {'name': 'Bukit Bersatu', 'lon': 96.838629, 'lat': 4.675184},
-    {'name': 'Blang Ara', 'lon': 96.892775, 'lat': 4.739693},
+    {'name': 'Blang Ara 1', 'lon': 96.892775, 'lat': 4.739693},
     {'name': 'Waq Pondok Sayur', 'lon': 96.878891, 'lat': 4.753434},
     {'name': 'Panji Mulia I', 'lon': 96.870119, 'lat': 4.744511},
     {'name': 'Panji Mulia II', 'lon': 96.878859, 'lat': 4.745205},
@@ -236,6 +236,6 @@ locations = [
     {'name': 'Rata Ara', 'lon': 96.77370354, 'lat': 4.85441499},
     {'name': 'Simpang Lancang', 'lon': 96.72105543, 'lat': 4.88266704},
     {'name': 'Pancar Jelobok', 'lon': 96.78801122, 'lat': 4.91606068},
-    {'name': 'Blang Ara', 'lon': 96.72637027, 'lat': 4.84975976},
+    {'name': 'Blang Ara 2', 'lon': 96.72637027, 'lat': 4.84975976},
     {'name': 'Gemasih', 'lon': 96.74872958, 'lat': 4.82697039},
 ]
