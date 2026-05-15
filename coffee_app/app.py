@@ -26,7 +26,8 @@ log = logging.getLogger(__name__)
 # CONFIG
 # ─────────────────────────────────────────────────────────────────────────────
 BASE_DIR        = Path(__file__).parent
-CLIMATE_CSV     = BASE_DIR / "data" / "climateData_BenerMeriah_2020-01-01_2024-12-31.csv"
+CLIMATE_CSV_1   = BASE_DIR / "data" / "climateData_BenerMeriah_2020-01-01_2024-12-31.csv"
+CLIMATE_CSV_2   = BASE_DIR / "data" / "climateData_BenerMeriah_2025-01-01_2025-12-31.csv"
 PRODUCTION_CSV  = BASE_DIR / "data" / "coffeeProduction_benerMeriah.csv"
 MODEL_PATH      = BASE_DIR / "data" / "best_model.pkl"
 RF_MODEL_PATH   = BASE_DIR / "data" / "rf_model.pkl"
@@ -49,8 +50,13 @@ CLIMATE_LABELS = {
     "wind_speed_10m":               {"label": "Kecepatan Angin",    "unit": "m/s",        "icon": "🌬️",  "desc": "Kecepatan angin rata-rata"},
     "dtr_celsius":                  {"label": "Rentang Suhu Harian","unit": "°C",         "icon": "☀️",  "desc": "Selisih suhu siang–malam (DTR)"},
     "vpd_kpa":                      {"label": "Defisit Tekanan Uap","unit": "kPa",        "icon": "🔆",  "desc": "Vapor Pressure Deficit (VPD)"},
-    "net_solar_rad_kwh_m2":        {"label": "Radiasi Matahari",   "unit": "kWh/m²",    "icon": "⚡",  "desc": "Radiasi matahari neto diserap"},
+    "net_solar_rad_kwh_m2":         {"label": "Radiasi Matahari",   "unit": "kWh/m²",    "icon": "⚡",  "desc": "Radiasi matahari neto diserap"},
 }
+
+CLIMATE_FILES = [
+    CLIMATE_CSV_1,
+    CLIMATE_CSV_2
+]
 
 # ─────────────────────────────────────────────────────────────────────────────
 # LOAD ASSETS
@@ -91,44 +97,44 @@ def load_assets():
     # ─────────────────────────────────────────────────────
     # Climate CSV (Enhanced Loading)
     # ─────────────────────────────────────────────────────
-    if CLIMATE_CSV.exists():
+    climate_frames = []
+    for csv_path in CLIMATE_FILES:
+        if not csv_path.exists():
+            log.warning(f"⚠ Climate file not found, skipping: {csv_path.name}")
+            continue
         try:
-            # Coba encoding utf-8 dulu, fallback ke latin-1 jika gagal
             for enc in ["utf-8", "latin-1", "cp1252"]:
                 try:
-                    df = pd.read_csv(CLIMATE_CSV, parse_dates=["date"], encoding=enc)
-                    log.info(f"✓ Climate CSV loaded with encoding '{enc}': {len(df)} rows")
+                    df = pd.read_csv(csv_path, parse_dates=["date"], encoding=enc)
+                    log.info(f"✓ Loaded '{csv_path.name}' ({enc}): {len(df)} rows")
                     break
                 except UnicodeDecodeError:
                     continue
             else:
-                raise ValueError("Could not decode CSV with any common encoding")
+                raise ValueError(f"Could not decode {csv_path.name}")
 
-            # Validasi kolom wajib
             required_cols = ["date", "location", "rainfall_mm", "temperature_celsius"]
             missing = [c for c in required_cols if c not in df.columns]
             if missing:
-                raise ValueError(f"Missing required columns: {missing}")
+                raise ValueError(f"Missing columns in {csv_path.name}: {missing}")
 
-            # Transformasi data
-            df["year"] = df["date"].dt.year
-            df["quarter"] = df["date"].dt.quarter
+            df["year"]     = df["date"].dt.year
+            df["quarter"]  = df["date"].dt.quarter
             df["location"] = df["location"].astype(str).str.strip().str.lower()
-            
-            # Opsional: muat koordinat jika diperlukan untuk fallback
-            if "latitude" in df.columns and "longitude" in df.columns:
-                df["latitude"] = pd.to_numeric(df["latitude"], errors="coerce")
-                df["longitude"] = pd.to_numeric(df["longitude"], errors="coerce")
 
-            assets["climate_df"] = df
-            log.info(f"✓ Climate preprocessing complete: {len(df)} rows, {df['location'].nunique()} locations")
+            climate_frames.append(df)
 
         except Exception as e:
-            log.error(f"✗ CRITICAL: Failed to load climate CSV: {e}", exc_info=True)
-            assets["climate_df"] = None  # Pastikan tetap ada key-nya agar tidak KeyError nanti
+            log.error(f"✗ Failed to load '{csv_path.name}': {e}", exc_info=True)
+
+    if climate_frames:
+        combined = pd.concat(climate_frames, ignore_index=True)
+        combined = combined.drop_duplicates(subset=["date", "location"])
+        assets["climate_df"] = combined
+        log.info(f"✓ climate_df ready: {len(combined)} rows from {len(climate_frames)} file(s), {combined['location'].nunique()} locations")
     else:
-        log.warning(f"⚠ Climate CSV not found at: {CLIMATE_CSV}")
-        assets["climate_df"] = None
+        log.error("✗ CRITICAL: No climate files loaded")
+        assets["climate_df"] = None 
 
     # Production CSV
     if PRODUCTION_CSV.exists():
